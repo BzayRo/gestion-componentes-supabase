@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Componentes - Laboratorio Informático</title>
+    <!-- Supabase JS Client SDK via CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-hover: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --border: #cbd5e1;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --success: #16a34a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding: 20px; }
+        
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { background: var(--primary); color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
+        
+        .grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+        @media(min-width: 900px) { .grid { grid-template-columns: 350px 1fr; } }
+        
+        .card { background: var(--card-bg); padding: 20px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .card h2 { margin-bottom: 15px; font-size: 1.25rem; border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+        
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 0.875rem; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 8px 12px; border: 1fr solid var(--border); border-radius: 4px; font-size: 0.9rem;
+        }
+        
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+        button {
+            padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: 0.2s;
+        }
+        .btn-primary { background: var(--primary); color: white; width: 100%; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-cancel { background: #64748b; color: white; display: none; }
+        .btn-edit { background: var(--warning); color: white; padding: 5px 10px; font-size: 0.8rem; }
+        .btn-delete { background: var(--danger); color: white; padding: 5px 10px; font-size: 0.8rem; }
+        
+        .filters { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid var(--border); padding: 10px; text-align: left; font-size: 0.875rem; }
+        th { background: #f1f5f9; font-weight: 700; }
+        tr:nth-child(even) { background-color: #f8fafc; }
+        
+        .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: bold; text-align: center; display: inline-block; }
+        .badge-disponible { background: #dcfce7; color: var(--success); }
+        .badge-en-uso { background: #dbeafe; color: var(--primary); }
+        .badge-reparacion { background: #fef3c7; color: var(--warning); }
+        .badge-baja { background: #fee2e2; color: var(--danger); }
+        
+        .alert { padding: 10px; border-radius: 4px; margin-bottom: 12px; font-size: 0.875rem; display: none; }
+        .alert-success { background: #dcfce7; color: var(--success); border: 1px solid #86efac; }
+        .alert-error { background: #fee2e2; color: var(--danger); border: 1px solid #fca5a5; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Laboratorio Informático - Colegio Nacional Asunción Escalada</h1>
+        <p>Sistema de Gestión de Equipos y Componentes (Supabase Cloud DB)</p>
+    </header>
+
+    <div class="grid">
+        <!-- Formulario ABM -->
+        <div class="card">
+            <h2 id="form-title">Registrar Componente</h2>
+            <div id="alert-box" class="alert"></div>
+            <form id="component-form">
+                <input type="hidden" id="item-id">
+                
+                <div class="form-group">
+                    <label for="codigo">Código Interno *</label>
+                    <input type="text" id="codigo" placeholder="Ej. ARD001" required>
+                </div>
+                <div class="form-group">
+                    <label for="nombre">Nombre *</label>
+                    <input type="text" id="nombre" placeholder="Ej. Arduino Uno R3" required>
+                </div>
+                <div class="form-group">
+                    <label for="categoria">Categoría *</label>
+                    <select id="categoria" required>
+                        <option value="">-- Seleccionar --</option>
+                        <option value="Arduino">Arduino</option>
+                        <option value="Sensores">Sensores</option>
+                        <option value="Computadoras">Computadoras</option>
+                        <option value="Monitores">Monitores</option>
+                        <option value="Periféricos">Periféricos</option>
+                        <option value="Componentes electrónicos">Componentes electrónicos</option>
+                        <option value="Herramientas">Herramientas</option>
+                        <option value="Redes">Redes</option>
+                        <option value="Otros">Otros</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="marca">Marca *</label>
+                    <input type="text" id="marca" placeholder="Ej. Elegoo / Genérico" required>
+                </div>
+                <div class="form-group">
+                    <label for="cantidad">Cantidad *</label>
+                    <input type="number" id="cantidad" min="0" value="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="estado">Estado *</label>
+                    <select id="estado" required>
+                        <option value="Disponible">Disponible</option>
+                        <option value="En uso">En uso</option>
+                        <option value="Reparación">Reparación</option>
+                        <option value="Baja">Baja</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="descripcion">Descripción</label>
+                    <textarea id="descripcion" rows="2" placeholder="Detalles de ubicación o estado"></textarea>
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" class="btn-primary" id="btn-save">Guardar Registro</button>
+                    <button type="button" class="btn-cancel" id="btn-cancel" onclick="resetForm()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Listado y Filtros -->
+        <div class="card">
+            <h2>Inventario de Equipos</h2>
+            
+            <div class="filters">
+                <input type="text" id="search-input" placeholder="Buscar por código, nombre o marca..." oninput="fetchComponents()">
+                <select id="filter-categoria" onchange="fetchComponents()">
+                    <option value="">Todas las Categorías</option>
+                    <option value="Arduino">Arduino</option>
+                    <option value="Sensores">Sensores</option>
+                    <option value="Computadoras">Computadoras</option>
+                    <option value="Monitores">Monitores</option>
+                    <option value="Periféricos">Periféricos</option>
+                    <option value="Componentes electrónicos">Componentes electrónicos</option>
+                    <option value="Herramientas">Herramientas</option>
+                    <option value="Redes">Redes</option>
+                    <option value="Otros">Otros</option>
+                </select>
+                <select id="filter-estado" onchange="fetchComponents()">
+                    <option value="">Todos los Estados</option>
+                    <option value="Disponible">Disponible</option>
+                    <option value="En uso">En uso</option>
+                    <option value="Reparación">Reparación</option>
+                    <option value="Baja">Baja</option>
+                </select>
+            </div>
+
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Marca</th>
+                            <th>Stock</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <tr><td colspan="7" style="text-align: center;">Cargando datos...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // CONFIGURACIÓN DE SUPABASE - Reemplazar con tus credenciales públicas del Panel de Supabase
+    const SUPABASE_URL = "https://lsqviqpocydlctvksmrp.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzcXZpcXBvY3lkbGN0dmtzbXJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwMTYxMjYsImV4cCI6MjEwNDU5MjEyNn0.oKqRgtVj-RTPnmL9R2KsMfyn5H5ZbH3LLfFx_RCSmtw";
+    
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    document.addEventListener("DOMContentLoaded", () => {
+        fetchComponents();
+        document.getElementById("component-form").addEventListener("submit", handleFormSubmit);
+    });
+
+    // Cargar y filtrar componentes desde la nube
+    async function fetchComponents() {
+        const search = document.getElementById("search-input").value.trim().toLowerCase();
+        const categoria = document.getElementById("filter-categoria").value;
+        const estado = document.getElementById("filter-estado").value;
+
+        let query = db.from('componentes').select('*').order('fecha_registro', { ascending: false });
+
+        if (categoria) query = query.eq('categoria', categoria);
+        if (estado) query = query.eq('estado', estado);
+
+        const { data, error } = await query;
+
+        if (error) {
+            showAlert("Error al cargar datos desde Supabase", "error");
+            console.error(error);
+            return;
+        }
+
+        // Filtrado por texto en el cliente (código, nombre o marca)
+        const filteredData = data.filter(item => 
+            item.codigo.toLowerCase().includes(search) ||
+            item.nombre.toLowerCase().includes(search) ||
+            item.marca.toLowerCase().includes(search)
+        );
+
+        renderTable(filteredData);
+    }
+
+    // Renderizar filas de la tabla
+    function renderTable(items) {
+        const tbody = document.getElementById("table-body");
+        tbody.innerHTML = "";
+
+        if (items.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align: center;">No se encontraron registros.</td></tr>`;
+            return;
+        }
+
+        items.forEach(item => {
+            const badgeClass = `badge-${item.estado.toLowerCase().replace(' ', '-')}`;
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${item.codigo}</strong></td>
+                    <td>${item.nombre}</td>
+                    <td>${item.categoria}</td>
+                    <td>${item.marca}</td>
+                    <td>${item.cantidad}</td>
+                    <td><span class="badge ${badgeClass}">${item.estado}</span></td>
+                    <td>
+                        <button class="btn-edit" onclick="editItem('${item.id}', '${item.codigo}', '${item.nombre}', '${item.categoria}', '${item.marca}', ${item.cantidad}, '${item.estado}', '${item.descripcion || ''}')">Editar</button>
+                        <button class="btn-delete" onclick="deleteItem('${item.id}', '${item.nombre}')">Eliminar</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // Guardar o Actualizar registro (Alta / Modificación)
+    async function handleFormSubmit(e) {
+        e.preventDefault();
+
+        const id = document.getElementById("item-id").value;
+        const payload = {
+            codigo: document.getElementById("codigo").value.trim(),
+            nombre: document.getElementById("nombre").value.trim(),
+            categoria: document.getElementById("categoria").value,
+            marca: document.getElementById("marca").value.trim(),
+            cantidad: parseInt(document.getElementById("cantidad").value),
+            estado: document.getElementById("estado").value,
+            descripcion: document.getElementById("descripcion").value.trim()
+        };
+
+        // Validaciones mínimas obligatorias
+        if (payload.cantidad < 0) {
+            showAlert("La cantidad no puede ser negativa", "error");
+            return;
+        }
+
+        let result;
+        if (id) {
+            // Modificación / Actualización
+            result = await db.from('componentes').update(payload).eq('id', id);
+        } else {
+            // Alta / Crear
+            result = await db.from('componentes').insert([payload]);
+        }
+
+        if (result.error) {
+            showAlert("Error al guardar en la nube: " + result.error.message, "error");
+        } else {
+            showAlert(`Registro ${id ? 'actualizado' : 'creado'} con éxito`, "success");
+            resetForm();
+            fetchComponents();
+        }
+    }
+
+    // Preparar formulario para Modificación
+    function editItem(id, codigo, nombre, categoria, marca, cantidad, estado, descripcion) {
+        document.getElementById("item-id").value = id;
+        document.getElementById("codigo").value = codigo;
+        document.getElementById("nombre").value = nombre;
+        document.getElementById("categoria").value = categoria;
+        document.getElementById("marca").value = marca;
+        document.getElementById("cantidad").value = cantidad;
+        document.getElementById("estado").value = estado;
+        document.getElementById("descripcion").value = descripcion;
+
+        document.getElementById("form-title").innerText = "Modificar Componente";
+        document.getElementById("btn-save").innerText = "Actualizar Registro";
+        document.getElementById("btn-cancel").style.display = "inline-block";
+    }
+
+    // Eliminar registro con confirmación previa (Baja)
+    async function deleteItem(id, nombre) {
+        if (confirm(`¿Está seguro de eliminar el componente "${nombre}" de la base de datos en la nube?`)) {
+            const { error } = await db.from('componentes').delete().eq('id', id);
+            if (error) {
+                showAlert("Error al eliminar el registro", "error");
+            } else {
+                showAlert("Registro eliminado correctamente", "success");
+                fetchComponents();
+            }
+        }
+    }
+
+    function resetForm() {
+        document.getElementById("component-form").reset();
+        document.getElementById("item-id").value = "";
+        document.getElementById("form-title").innerText = "Registrar Componente";
+        document.getElementById("btn-save").innerText = "Guardar Registro";
+        document.getElementById("btn-cancel").style.display = "none";
+    }
+
+    function showAlert(msg, type) {
+        const alert = document.getElementById("alert-box");
+        alert.className = `alert alert-${type}`;
+        alert.innerText = msg;
+        alert.style.display = "block";
+        setTimeout(() => { alert.style.display = "none"; }, 4000);
+    }
+</script>
+</body>
+</html>
