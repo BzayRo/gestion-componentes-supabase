@@ -1,7 +1,7 @@
 // Configuración de Supabase
 const SUPABASE_URL = "https://tsqviqpocydlctvksmrp.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzcXZpcXBvY3lkbGN0dmtzbXJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwMTYxMjYsImV4cCI6MjEwNDU5MjEyNn0.oKqRgtVj-RTPnmL9R2KsMfyn5H5ZbH3LLfFx_RCSmtw"; 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 document.addEventListener("DOMContentLoaded", () => {
     cargarComponentes();
