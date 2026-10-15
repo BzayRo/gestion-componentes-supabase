@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const estado = document.getElementById("estado").value;
         const descripcion = document.getElementById("descripcion").value;
 
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from("componentes")
             .insert([{ codigo, nombre, categoria, marca, cantidad, estado, descripcion }]);
 
