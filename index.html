@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Componentes - Asunción Escalada</title>
-    <!-- Enlace a la hoja de estilos externa -->
     <link rel="stylesheet" href="styles.css">
     <!-- SDK de Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -18,10 +17,11 @@
         </header>
 
         <div class="main-content">
-            <!-- Formulario de Registro -->
+            <!-- Formulario de Registro / Edición -->
             <div class="card">
-                <h2>Registrar Componente</h2>
+                <h2 id="formTitle">Registrar Componente</h2>
                 <form id="componenteForm">
+                    <input type="hidden" id="editId">
                     <div class="form-group">
                         <label for="codigo">Código</label>
                         <input type="text" id="codigo" placeholder="Ej. ARD001" autocomplete="off" required>
@@ -54,7 +54,8 @@
                         <label for="descripcion">Descripción</label>
                         <textarea id="descripcion" rows="3" placeholder="Detalles adicionales..."></textarea>
                     </div>
-                    <button type="submit" class="btn-primary">Guardar Registro</button>
+                    <button type="submit" id="btnSubmit" class="btn-primary">Guardar Registro</button>
+                    <button type="button" id="btnCancel" class="btn-secondary" style="display:none; margin-top: 8px; width: 100%; background: #64748b; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer;" onclick="cancelarEdicion()">Cancelar Edición</button>
                 </form>
             </div>
 
@@ -67,10 +68,9 @@
                             <tr>
                                 <th>Código</th>
                                 <th>Nombre</th>
-                                <th>Categoría</th>
                                 <th>Cant.</th>
                                 <th>Estado</th>
-                                <th>Acción</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="tablaComponentes">
@@ -82,7 +82,6 @@
         </div>
     </div>
 
-    <!-- Enlace al archivo JavaScript externo -->
     <script src="script.js"></script>
 </body>
 </html>
