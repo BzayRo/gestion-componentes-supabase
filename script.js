@@ -33,7 +33,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function cargarComponentes() {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
         .from("componentes")
         .select("*")
         .order("id", { ascending: false });
@@ -64,7 +64,7 @@ async function cargarComponentes() {
 
 async function eliminarComponente(id) {
     if (confirm("¿Estás seguro de eliminar este componente?")) {
-        const { error } = await supabase
+        const { error } = await supabaseClient
             .from("componentes")
             .delete()
             .eq("id", id);
