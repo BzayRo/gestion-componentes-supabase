@@ -1,4 +1,3 @@
-// Configuración de Supabase (¡Asegúrate de tener tus datos reales aquí!)
 const SUPABASE_URL = "https://lsqviqpocydlctvksmrp.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxzcXZpcXBvY3lkbGN0dmtzbXJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkwMTYxMjYsImV4cCI6MjEwNDU5MjEyNn0.oKqRgtVj-RTPnmL9R2KsMfyn5H5ZbH3LLfFx_RCSmtw"; 
 
@@ -21,7 +20,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const descripcion = document.getElementById("descripcion").value;
 
         if (editId) {
-            // MODO EDITAR
             const { error } = await supabaseClient
                 .from("componentes")
                 .update({ codigo, nombre, categoria, marca, cantidad, estado, descripcion })
@@ -35,7 +33,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 cargarComponentes();
             }
         } else {
-            // MODO CREAR NUEVO
             const { error } = await supabaseClient
                 .from("componentes")
                 .insert([{ codigo, nombre, categoria, marca, cantidad, estado, descripcion }]);
@@ -71,6 +68,8 @@ async function cargarComponentes() {
             tr.innerHTML = `
                 <td>${comp.codigo}</td>
                 <td>${comp.nombre}</td>
+                <td>${comp.categoria || '-'}</td>
+                <td>${comp.marca || '-'}</td>
                 <td>${comp.cantidad}</td>
                 <td>${comp.estado}</td>
                 <td>
@@ -81,7 +80,7 @@ async function cargarComponentes() {
             tbody.appendChild(tr);
         });
     } else {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748b;">No hay componentes registrados todavía.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#64748b;">No hay componentes registrados todavía.</td></tr>`;
     }
 }
 
